@@ -1,6 +1,5 @@
 package com.example.android.popularmovies;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.ListPreference;
@@ -9,18 +8,15 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.android.popularmovies.R;
-
 public class SettingsActivity extends AppCompatActivity {
-    private static Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
-        context = SettingsActivity.this;
     }
 
+    /* Add the preferences from the settings */
     public static class MoviesPreferenceFragment extends PreferenceFragment
             implements Preference.OnPreferenceChangeListener {
 

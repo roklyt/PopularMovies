@@ -17,14 +17,13 @@ public class MovieJsonUtils {
 
     /* Status message */
     public final static String MOVIE_STATUS_MESSGAE = "status_message";
+
     /**
      * This method parses JSON from a web response and returns an array of Strings
      * describing the movie.
      *
      * @param movieJsonStr JSON response from server
-     *
      * @return Array of Strings describing weather data
-     *
      * @throws JSONException If JSON data cannot be properly parsed
      */
     public static List<Movies> getMovieListFromJson(String movieJsonStr)
@@ -55,6 +54,7 @@ public class MovieJsonUtils {
 
         List<Movies> movies = new ArrayList<>();
 
+        //Iterate through all array objects and grep the movie data
         for (int i = 0; i < movieArray.length(); i++) {
             String title;
             String releaseDate;
@@ -80,9 +80,9 @@ public class MovieJsonUtils {
             /* get plot synopsis */
             plotSynopsis = movieObject.getString(MOVIE_SYNOPSIS);
 
+            // Add the movie to the Movies List
             movies.add(new Movies(title, posterPath, releaseDate, average, plotSynopsis));
         }
-
         return movies;
     }
 }

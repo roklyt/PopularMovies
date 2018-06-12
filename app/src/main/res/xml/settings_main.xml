@@ -16,5 +16,4 @@
         android:selectAllOnFocus="true"
         android:hint=""
         android:title="@string/settings_api_key_label" />
-
 </PreferenceScreen>

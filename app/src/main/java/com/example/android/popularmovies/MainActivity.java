@@ -21,8 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovies.utilities.NetworkUtils;
-import com.example.android.popularmovies.DetailActivity;
-import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.data.Movies;
 import com.example.android.popularmovies.utilities.MovieJsonUtils;
 
@@ -32,16 +30,17 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler{
+public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
 
+    /* Recycleview adapter*/
     private MovieAdapter MovieAdapter;
-
-    private List<Movies> MoviesList =new ArrayList<>();
-
+    /* List of all movies*/
+    private List<Movies> MoviesList = new ArrayList<>();
+    /* recyclerview to populate all movies*/
     private RecyclerView RecyclerView;
-
+    /* Error text view*/
     private TextView ErrorMessageDisplay;
-
+    /* Progress bar as indicator */
     private ProgressBar LoadingIndicator;
 
     @Override
@@ -49,34 +48,42 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        /* find all views */
         ErrorMessageDisplay = findViewById(R.id.error_message);
 
         RecyclerView = findViewById(R.id.recyclerview_movies);
 
         LoadingIndicator = findViewById(R.id.pb_loading_indicator);
 
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int width = size.x;
+        /* set grid layout manager to the recyclerview */
+        RecyclerView.setLayoutManager(new GridLayoutManager(this, calculateSpan()));
 
-        int spanCount = width / 185;
-
-        RecyclerView.setLayoutManager(new GridLayoutManager(this, spanCount));
-
+        /* Add the Movie adapter to the recyclerview.*/
         MovieAdapter = new MovieAdapter(this, MoviesList);
         RecyclerView.setAdapter(MovieAdapter);
 
-        if(checkNetwork()){
+        /* If network is available proceed else show error message */
+        if (checkNetwork()) {
             loadMovieData();
-        }else{
+        } else {
             Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_LONG).show();
             showErrorMessage();
         }
     }
 
-    private boolean checkNetwork(){
-        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+    /* Calculate how many thumbnails fit on the screen */
+    private int calculateSpan() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+
+        return width / NetworkUtils.W_185_VALUE;
+    }
+
+    /* Check network */
+    private boolean checkNetwork() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         if (netInfo != null && netInfo.isConnectedOrConnecting()) {
             return true;
@@ -98,7 +105,8 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         ErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
-    private void loadMovieData(){
+    private void loadMovieData() {
+        /* Get shared preferences and pas them to the async task*/
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         String orderBy = sharedPrefs.getString(
@@ -106,18 +114,12 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
                 getString(R.string.settings_order_default));
 
         String apiKey = sharedPrefs.getString(
-                getString(R.string.settings_api_key_key),"");
+                getString(R.string.settings_api_key_key), "");
 
-        new FetchMoviesTask().execute(new String[]{orderBy, apiKey});
-
+        new FetchMoviesTask().execute(orderBy, apiKey);
     }
 
-    /**
-     * This method is overridden by our MainActivity class in order to handle RecyclerView item
-     * clicks.
-     *
-     * @param currentMovie The weather for the day that was clicked
-     */
+    /* On click listener to make an intent for the selected movie to the details activity */
     @Override
     public void onClick(Movies currentMovie) {
         Class destinationClass = DetailActivity.class;
@@ -134,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return true;
     }
 
+    /* start the settings activity if the user click the settings symbol. The if is not necessary here because we have only one button but i implemented it for further use */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -145,6 +148,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return super.onOptionsItemSelected(item);
     }
 
+    /* Asyn Task to make an url request against the tmdb */
     public class FetchMoviesTask extends AsyncTask<String, Void, List<Movies>> {
 
         @Override
@@ -163,19 +167,21 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
             String searchFor = params[0];
             String apiKey = params[1];
-            URL movieRequestUrl = NetworkUtils.buildUrl(apiKey,searchFor);
+            /* build the url */
+            URL movieRequestUrl = NetworkUtils.buildUrl(apiKey, searchFor);
 
             try {
                 String jsonMovieResponse = NetworkUtils
                         .getResponseFromHttpUrl(movieRequestUrl);
 
+                /* If there is an status object something went wrong. We pas here the error message into our error text view */
                 JSONObject movieJson = new JSONObject(jsonMovieResponse);
-                if(movieJson.has(MovieJsonUtils.MOVIE_STATUS_CODE)){
+                if (movieJson.has(MovieJsonUtils.MOVIE_STATUS_CODE)) {
                     ErrorMessageDisplay.setText(movieJson.getString(MovieJsonUtils.MOVIE_STATUS_MESSGAE));
                     showErrorMessage();
                     return null;
                 }
-
+                /* Everything is fine we can parse the json to get or movies*/
                 List<Movies> movieDataList = MovieJsonUtils
                         .getMovieListFromJson(jsonMovieResponse);
 
@@ -189,9 +195,11 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
 
         @Override
         protected void onPostExecute(List<Movies> movieData) {
+            /* Hide the loading bar */
             LoadingIndicator.setVisibility(View.INVISIBLE);
             if (movieData != null) {
                 showMovieDataView();
+                /* set the new data to the adapter */
                 MovieAdapter.setMovieData(movieData);
             } else {
                 showErrorMessage();

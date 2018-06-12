@@ -15,21 +15,17 @@ import java.util.Scanner;
  */
 public final class NetworkUtils {
 
+    /* Different size params for the poster*/
+    public static final String W_185 = "w185";
+    public static final int W_185_VALUE = 185;
+    public static final String W_500 = "w500";
+    /* Key for the api entry*/
+    final static String API_KEY = "api_key";
     private static final String TAG = NetworkUtils.class.getSimpleName();
-
     private static final String BASE_MOVIE_URL =
             "http://api.themoviedb.org/3/movie/";
-
-    public static final String BASE_POSTER_URL =
+    private static final String BASE_POSTER_URL =
             "http://image.tmdb.org/t/p/";
-
-    public static final String W_185 = "w185";
-
-    public static final String W_342 = "w342";
-
-    public static final String W_500 = "w500";
-
-    final static String API_KEY = "api_key";
 
     /**
      * Builds the URL used to talk to the movie database server.
@@ -55,7 +51,7 @@ public final class NetworkUtils {
         return url;
     }
 
-    public static URL buildPosterUrl(String posterPath, String posterSize){
+    public static URL buildPosterUrl(String posterPath, String posterSize) {
 
         Uri builtUri = Uri.parse(BASE_POSTER_URL).buildUpon()
                 .appendPath(posterSize)
@@ -63,6 +59,7 @@ public final class NetworkUtils {
 
         URL url = null;
         try {
+            /* I have to add here the posterPath that way because the given string has / at his beginning. With the uri parser i get an encoded / and that doesn't work*/
             url = new URL(builtUri.toString() + posterPath);
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -81,12 +78,13 @@ public final class NetworkUtils {
      * @throws IOException Related to network and stream reading
      */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
+
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
             InputStream in;
-            if(urlConnection.getResponseCode() == 200){
-               in = urlConnection.getInputStream();
-            }else{
+            if (urlConnection.getResponseCode() == 200) {
+                in = urlConnection.getInputStream();
+            } else {
                 in = urlConnection.getErrorStream();
             }
 

@@ -5,7 +5,7 @@
     <string name="settings_menu_item">Settings</string>
     <string name="settings_title">Movie Settings</string>
 
-    // Settings
+    // Strings for order by settings
     <string name="settings_order_label">Ordered by</string>
     <string name="settings_order_key" translatable="false">ordered_by</string>
     <string name="settings_order_default" translatable="false">@string/settings_order_popular_value</string>
@@ -16,15 +16,13 @@
     <string name="settings_order_rated_label">Highest rated</string>
     <string name="settings_order_rated_value" translatable="false">top_rated</string>
 
-
+    // Strings for the api key settings
     <string name="settings_api_key_label">Api Key</string>
     <string name="settings_api_key_key" translatable="false">api_key</string>
     <string name="settings_api_key_hint">Please enter your api key</string>
 
-
+    // Error strings for different behaviours
     <string name="error_empty_extra">There are no informations about this movie</string>
-
     <string name="error_no_data">We could not receive any data.\n\tPlease try again Later</string>
-
     <string name="error_no_network">No internet connection.</string>
 </resources>
