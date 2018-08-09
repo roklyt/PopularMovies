@@ -35,7 +35,7 @@ public class Reviews implements Parcelable {
         return Author;
     }
 
-    public String getText() {
+    public String getContent() {
         return Content;
     }
 

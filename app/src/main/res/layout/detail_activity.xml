@@ -101,6 +101,13 @@
             app:layout_constraintTop_toBottomOf="@+id/poster_image"
             tools:hint="synopsis_text" />
 
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_reviews"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/synopsis_text"
+            app:layout_constraintStart_toStartOf="parent"/>
+
     </android.support.constraint.ConstraintLayout>
 
 </ScrollView>

@@ -9,11 +9,16 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmovies.Adapter.MovieAdapter;
+import com.example.android.popularmovies.Adapter.ReviewAdapter;
 import com.example.android.popularmovies.data.Reviews;
 import com.example.android.popularmovies.utilities.MovieJsonUtils;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -24,9 +29,17 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.ReviewAdapter.ReviewAdapterOnClickHandler{
+
+    /* Recycleview adapter*/
+    private com.example.android.popularmovies.Adapter.ReviewAdapter ReviewAdapter;
+    /* List of all reviews*/
+    private List<Reviews> ReviewsList = new ArrayList<>();
+    /* recyclerview to populate all reviews*/
+    private android.support.v7.widget.RecyclerView RecyclerView;
 
     private String MovieId;
 
@@ -59,6 +72,15 @@ public class DetailActivity extends AppCompatActivity {
 
             TextView synopsisView = findViewById(R.id.synopsis_text);
             synopsisView.setText(currentMovies.getSynopsis());
+
+            RecyclerView = findViewById(R.id.recyclerview_reviews);
+
+            /* set linear layout manager to the recyclerview */
+            RecyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+            /* Add the review adapter to the recyclerview.*/
+            ReviewAdapter = new ReviewAdapter(this, ReviewsList);
+            RecyclerView.setAdapter(ReviewAdapter);
 
             /* If network is available proceed else show error message */
             if (checkNetwork()) {
@@ -93,6 +115,11 @@ public class DetailActivity extends AppCompatActivity {
                 getString(R.string.settings_api_key_key), "");
 
         new DetailActivity.FetchMoviesReviews().execute(apiKey);
+    }
+
+    @Override
+    public void onClick(Reviews currentReview) {
+        Toast.makeText(this, "Da kommt enoch was", Toast.LENGTH_LONG).show();
     }
 
 
@@ -142,7 +169,7 @@ public class DetailActivity extends AppCompatActivity {
             if (reviewData != null) {
                 //showMovieDataView();
                 /* set the new data to the adapter */
-                //MovieAdapter.setMovieData(movieData);
+                ReviewAdapter.setReviewData(reviewData);
             } else {
                 //showErrorMessage();
             }

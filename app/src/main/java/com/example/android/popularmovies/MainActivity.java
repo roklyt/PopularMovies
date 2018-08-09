@@ -20,6 +20,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.popularmovies.Adapter.MovieAdapter;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.data.Movies;
 import com.example.android.popularmovies.utilities.MovieJsonUtils;
@@ -30,7 +31,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MovieAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.MovieAdapter.MovieAdapterOnClickHandler {
 
     /* Recycleview adapter*/
     private MovieAdapter MovieAdapter;
