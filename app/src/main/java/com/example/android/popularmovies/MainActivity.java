@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
     private void showMovieDataView() {
         /* First, make sure the error is invisible */
         ErrorMessageDisplay.setVisibility(View.INVISIBLE);
-        /* Then, make sure the weather data is visible */
+        /* Then, make sure the movie data is visible */
         RecyclerView.setVisibility(View.VISIBLE);
     }
 
@@ -148,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements MovieAdapter.Movi
         return super.onOptionsItemSelected(item);
     }
 
-    /* Asyn Task to make an url request against the tmdb */
+    /* Async Task to make an url request against the tmdb to get the movie list*/
     public class FetchMoviesTask extends AsyncTask<String, Void, List<Movies>> {
 
         @Override

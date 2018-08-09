@@ -26,6 +26,8 @@ public final class NetworkUtils {
             "http://api.themoviedb.org/3/movie/";
     private static final String BASE_POSTER_URL =
             "http://image.tmdb.org/t/p/";
+    public static final String REVIEWS = "reviews";
+
 
     /**
      * Builds the URL used to talk to the movie database server.
@@ -46,7 +48,7 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.v(TAG, "Built URI " + url);
+        Log.v(TAG, "buildUrl" + url);
 
         return url;
     }
@@ -65,7 +67,27 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.v(TAG, "Built URI " + url);
+        Log.v(TAG, "buildPosterUrl" + url);
+
+        return url;
+    }
+
+    public static URL buildReviewUrl(String movieId, String apiKey){
+
+        Uri builtUri = Uri.parse(BASE_MOVIE_URL).buildUpon()
+                .appendPath(movieId)
+                .appendPath(REVIEWS)
+                .appendQueryParameter(API_KEY, apiKey)
+                .build();
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        Log.v(TAG, "buildReviewUrl" + url);
 
         return url;
     }
