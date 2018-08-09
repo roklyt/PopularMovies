@@ -20,7 +20,7 @@ public final class NetworkUtils {
     public static final int W_185_VALUE = 185;
     public static final String W_500 = "w500";
     /* Key for the api entry*/
-    final static String API_KEY = "api_key";
+    private final static String API_KEY = "api_key";
     private static final String TAG = NetworkUtils.class.getSimpleName();
     private static final String BASE_MOVIE_URL =
             "http://api.themoviedb.org/3/movie/";

@@ -19,13 +19,15 @@ public class Movies implements Parcelable {
 
     };
     private String Title;
+    private String Id;
     private String PosterPath;
     private String PublishedDate;
     private double Average;
     private String Synopsis;
 
-    public Movies(String title, String posterPath, String publishedDate, double average, String synopsis) {
+    public Movies(String title, String id, String posterPath, String publishedDate, double average, String synopsis) {
         Title = title;
+        Id = id;
         PosterPath = posterPath;
         PublishedDate = publishedDate;
         Average = average;
@@ -34,6 +36,7 @@ public class Movies implements Parcelable {
 
     private Movies(Parcel in) {
         Title = in.readString();
+        Id = in.readString();
         PosterPath = in.readString();
         PublishedDate = in.readString();
         Average = in.readDouble();
@@ -42,6 +45,10 @@ public class Movies implements Parcelable {
 
     public String getTitle() {
         return Title;
+    }
+
+    public String getId() {
+        return Id;
     }
 
     public String getPosterPath() {
@@ -63,7 +70,8 @@ public class Movies implements Parcelable {
     @Override
     public String toString() {
         return "Movie{" +
-                "Titile='" + Title + '\'' +
+                "Title='" + Title + '\'' +
+                "Id='" + Id + '\'' +
                 ", PosterPath='" + PosterPath + '\'' +
                 ", PublishedDate='" + PublishedDate + '\'' +
                 ", Average='" + Average + '\'' +
@@ -79,6 +87,7 @@ public class Movies implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(Title);
+        parcel.writeString(Id);
         parcel.writeString(PosterPath);
         parcel.writeString(PublishedDate);
         parcel.writeDouble(Average);

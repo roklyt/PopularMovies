@@ -35,6 +35,9 @@ public class MovieJsonUtils {
         /* Title object */
         final String MOVIE_TITLE = "title";
 
+        /* Movie Id */
+        final String MOVIE_ID = "id";
+
         /* Release date object */
         final String MOVIE_RELEASE_DATE = "release_date";
 
@@ -57,6 +60,7 @@ public class MovieJsonUtils {
         //Iterate through all array objects and grep the movie data
         for (int i = 0; i < movieArray.length(); i++) {
             String title;
+            String id;
             String releaseDate;
             String posterPath;
             Double average;
@@ -67,6 +71,9 @@ public class MovieJsonUtils {
 
             /* Get the title */
             title = movieObject.getString(MOVIE_TITLE);
+
+            /* Get the id */
+            id = movieObject.getString(MOVIE_ID);
 
             /* Get release date*/
             releaseDate = movieObject.getString(MOVIE_RELEASE_DATE);
@@ -81,7 +88,7 @@ public class MovieJsonUtils {
             plotSynopsis = movieObject.getString(MOVIE_SYNOPSIS);
 
             // Add the movie to the Movies List
-            movies.add(new Movies(title, posterPath, releaseDate, average, plotSynopsis));
+            movies.add(new Movies(title, id, posterPath, releaseDate, average, plotSynopsis));
         }
         return movies;
     }
