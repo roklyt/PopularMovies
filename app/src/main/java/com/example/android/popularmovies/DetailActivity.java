@@ -17,29 +17,35 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.popularmovies.Adapter.MovieAdapter;
 import com.example.android.popularmovies.Adapter.ReviewAdapter;
+import com.example.android.popularmovies.Adapter.TrailerAdapter;
 import com.example.android.popularmovies.data.Reviews;
-import com.example.android.popularmovies.utilities.MovieJsonUtils;
+import com.example.android.popularmovies.data.Trailer;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.data.Movies;
 import com.example.android.popularmovies.utilities.ReviewsJsonUtils;
+import com.example.android.popularmovies.utilities.TrailerJsonUtils;
 import com.squareup.picasso.Picasso;
 
-import org.json.JSONObject;
 
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.ReviewAdapter.ReviewAdapterOnClickHandler{
+public class DetailActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.ReviewAdapter.ReviewAdapterOnClickHandler, com.example.android.popularmovies.Adapter.TrailerAdapter.TrailerAdapterOnClickHandler{
 
     /* Recycleview adapter*/
     private com.example.android.popularmovies.Adapter.ReviewAdapter ReviewAdapter;
     /* List of all reviews*/
     private List<Reviews> ReviewsList = new ArrayList<>();
+    /* Recycleview adapter*/
+    private com.example.android.popularmovies.Adapter.TrailerAdapter TrailerAdapter;
+    /* List of all trailer*/
+    private List<Trailer> TrailerList = new ArrayList<>();
+
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerView;
+    private android.support.v7.widget.RecyclerView RecyclerViewTrailer;
 
     private String MovieId;
 
@@ -73,6 +79,16 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
             TextView synopsisView = findViewById(R.id.synopsis_text);
             synopsisView.setText(currentMovies.getSynopsis());
 
+            RecyclerViewTrailer = findViewById(R.id.recyclerview_trailer);
+
+            /* set linear layout manager to the recyclerview */
+            RecyclerViewTrailer.setLayoutManager(new LinearLayoutManager(this));
+
+            /* Add the review adapter to the recyclerview.*/
+            TrailerAdapter = new TrailerAdapter(this, TrailerList);
+            RecyclerViewTrailer.setAdapter(TrailerAdapter);
+
+
             RecyclerView = findViewById(R.id.recyclerview_reviews);
 
             /* set linear layout manager to the recyclerview */
@@ -84,7 +100,7 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
 
             /* If network is available proceed else show error message */
             if (checkNetwork()) {
-                loadReviews();
+                loadContent();
             } else {
                 Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_LONG).show();
                 //showErrorMessage();
@@ -107,14 +123,16 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
         return false;
     }
 
-    private void loadReviews() {
+    private void loadContent() {
         /* Get shared preferences and pas them to the async task*/
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         String apiKey = sharedPrefs.getString(
                 getString(R.string.settings_api_key_key), "");
 
-        new DetailActivity.FetchMoviesReviews().execute(apiKey);
+        new DetailActivity.FetchMoviesReviews().execute(apiKey, MovieId);
+
+        new DetailActivity.FetchMoviesTrailer().execute(apiKey, MovieId);
     }
 
     @Override
@@ -122,8 +140,13 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
         Toast.makeText(this, "Da kommt enoch was", Toast.LENGTH_LONG).show();
     }
 
+    @Override
+    public void onClick(Trailer currentTrailer) {
+        Toast.makeText(this, "Da kommt enoch was", Toast.LENGTH_LONG).show();
+    }
 
-    /* Async Task to make an url request against the tmdb to get the movie list*/
+
+    /* Async Task to make an url request against the tmdb to get the reviews list*/
     public class FetchMoviesReviews extends AsyncTask<String, Void, List<Reviews>> {
 
         @Override
@@ -141,9 +164,10 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
             }
 
             String apiKey = params[0];
+            String movieId = params[1];
 
             /* build the url */
-            URL reviewRequestUrl = NetworkUtils.buildReviewUrl(MovieId, apiKey);
+            URL reviewRequestUrl = NetworkUtils.buildReviewUrl(movieId, apiKey);
 
             try {
                 String jsonReviewResponse = NetworkUtils
@@ -170,6 +194,61 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
                 //showMovieDataView();
                 /* set the new data to the adapter */
                 ReviewAdapter.setReviewData(reviewData);
+            } else {
+                //showErrorMessage();
+            }
+        }
+    }
+
+
+    /* Async Task to make an url request against the tmdb to get the video list*/
+    private class FetchMoviesTrailer extends AsyncTask<String, Void, List<Trailer>> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //LoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected List<Trailer> doInBackground(String... params) {
+
+            /* If there's no zip code, there's nothing to look up. */
+            if (params.length == 0) {
+                return null;
+            }
+
+            String apiKey = params[0];
+            String movieId = params[1];
+
+            /* build the url */
+            URL reviewRequestUrl = NetworkUtils.buildTrailerUrl(movieId, apiKey);
+
+            try {
+                String jsonTrailerResponse = NetworkUtils
+                        .getResponseFromHttpUrl(reviewRequestUrl);
+
+
+                /* Everything is fine we can parse the json to get our review*/
+                List<Trailer> trailerDataList = TrailerJsonUtils
+                        .getTrailerListFromJson(jsonTrailerResponse);
+
+                return trailerDataList;
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(List<Trailer> trailerData) {
+            /* Hide the loading bar */
+            //LoadingIndicator.setVisibility(View.INVISIBLE);
+            if (trailerData != null) {
+                //showMovieDataView();
+                /* set the new data to the adapter */
+                TrailerAdapter.setTrailerData(trailerData);
             } else {
                 //showErrorMessage();
             }

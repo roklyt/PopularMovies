@@ -23,7 +23,7 @@ public class MovieJsonUtils {
      * describing the movie.
      *
      * @param movieJsonStr JSON response from server
-     * @return Array of Strings describing weather data
+     * @return Array of Strings describing movie data
      * @throws JSONException If JSON data cannot be properly parsed
      */
     public static List<Movies> getMovieListFromJson(String movieJsonStr)

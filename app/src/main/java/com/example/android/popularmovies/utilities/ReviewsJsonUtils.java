@@ -18,7 +18,7 @@ public class ReviewsJsonUtils {
      * describing the review.
      *
      * @param reviewJsonStr JSON response from server
-     * @return Array of Strings describing weather data
+     * @return Array of Strings describing review data
      * @throws JSONException If JSON data cannot be properly parsed
      */
     public static List<Reviews> getReviewListFromJson(String reviewJsonStr)
@@ -31,7 +31,7 @@ public class ReviewsJsonUtils {
         final String REVIEW_AUTHOR = "author";
 
         /* Review content */
-        final String REVIEW_COTENT = "content";
+        final String REVIEW_CONTENT = "content";
 
         JSONObject reviewJson = new JSONObject(reviewJsonStr);
 
@@ -51,7 +51,7 @@ public class ReviewsJsonUtils {
             author = reviewObject.getString(REVIEW_AUTHOR);
 
             /* Get the content */
-            content = reviewObject.getString(REVIEW_COTENT);
+            content = reviewObject.getString(REVIEW_CONTENT);
 
             // Add the movie to the Movies List
             reviews.add(new Reviews(author, content));
