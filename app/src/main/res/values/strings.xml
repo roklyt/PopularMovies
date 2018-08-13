@@ -5,6 +5,14 @@
     <string name="settings_menu_item">Settings</string>
     <string name="settings_title">Movie Settings</string>
 
+    // Detail activity  header text
+    <string name="trailer_rv_header">Trailer:</string>
+    <string name="trailer_header">Name: </string>
+    <string name="type_header">Trailer type: </string>
+    <string name="review_header">Reviews:</string>
+    <string name="review_author">Author: </string>
+    <string name="review_content">Review: </string>
+
     // Strings for order by settings
     <string name="settings_order_label">Ordered by</string>
     <string name="settings_order_key" translatable="false">ordered_by</string>
@@ -20,6 +28,7 @@
     <string name="settings_api_key_label">Api Key</string>
     <string name="settings_api_key_key" translatable="false">api_key</string>
     <string name="settings_api_key_hint">Please enter your api key</string>
+
 
     // Error strings for different behaviours
     <string name="error_empty_extra">There are no informations about this movie</string>

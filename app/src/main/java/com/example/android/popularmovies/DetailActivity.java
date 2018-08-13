@@ -14,6 +14,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,8 +45,12 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
     private List<Trailer> TrailerList = new ArrayList<>();
 
     /* recyclerview to populate all reviews*/
-    private android.support.v7.widget.RecyclerView RecyclerView;
+    private android.support.v7.widget.RecyclerView RecyclerViewReviews;
     private android.support.v7.widget.RecyclerView RecyclerViewTrailer;
+
+    /* recycler trailer progrss bar and error message views */
+    private TextView TrailerErrorTextView;
+    private ProgressBar TrailerProgressBar;
 
     private String MovieId;
 
@@ -79,6 +84,10 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
             TextView synopsisView = findViewById(R.id.synopsis_text);
             synopsisView.setText(currentMovies.getSynopsis());
 
+            /* Progress bar and text view for trailer recycle view */
+            TrailerErrorTextView = findViewById(R.id.detail_trailer_error_message);
+            TrailerProgressBar = findViewById(R.id.pb_trailer_loading_indicator);
+
             RecyclerViewTrailer = findViewById(R.id.recyclerview_trailer);
 
             /* set linear layout manager to the recyclerview */
@@ -89,14 +98,14 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
             RecyclerViewTrailer.setAdapter(TrailerAdapter);
 
 
-            RecyclerView = findViewById(R.id.recyclerview_reviews);
+            RecyclerViewReviews = findViewById(R.id.recyclerview_reviews);
 
             /* set linear layout manager to the recyclerview */
-            RecyclerView.setLayoutManager(new LinearLayoutManager(this));
+            RecyclerViewReviews.setLayoutManager(new LinearLayoutManager(this));
 
             /* Add the review adapter to the recyclerview.*/
             ReviewAdapter = new ReviewAdapter(this, ReviewsList);
-            RecyclerView.setAdapter(ReviewAdapter);
+            RecyclerViewReviews.setAdapter(ReviewAdapter);
 
             /* If network is available proceed else show error message */
             if (checkNetwork()) {
@@ -200,6 +209,19 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
         }
     }
 
+    private void showTrailerDataView() {
+        /* First, make sure the error is invisible */
+        TrailerErrorTextView.setVisibility(View.INVISIBLE);
+        /* Then, make sure the movie data is visible */
+        RecyclerViewTrailer.setVisibility(View.VISIBLE);
+    }
+
+    private void showTrailerErrorMessage() {
+        /* First, hide the currently visible data */
+        RecyclerViewTrailer.setVisibility(View.INVISIBLE);
+        /* Then, show the error */
+        TrailerErrorTextView.setVisibility(View.VISIBLE);
+    }
 
     /* Async Task to make an url request against the tmdb to get the video list*/
     private class FetchMoviesTrailer extends AsyncTask<String, Void, List<Trailer>> {
@@ -207,7 +229,7 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //LoadingIndicator.setVisibility(View.VISIBLE);
+            TrailerProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -244,13 +266,13 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
         @Override
         protected void onPostExecute(List<Trailer> trailerData) {
             /* Hide the loading bar */
-            //LoadingIndicator.setVisibility(View.INVISIBLE);
+            TrailerProgressBar.setVisibility(View.INVISIBLE);
             if (trailerData != null) {
-                //showMovieDataView();
+                showTrailerDataView();
                 /* set the new data to the adapter */
                 TrailerAdapter.setTrailerData(trailerData);
             } else {
-                //showErrorMessage();
+                showTrailerErrorMessage();
             }
         }
     }

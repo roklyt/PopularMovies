@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#560027</color>
     <color name="colorAccent">#bc477b</color>
     <color name="colorBackground">#000000</color>
+    <color name="colorText">#ffffff</color>
 
     <color name="rating_circle">#ffff00</color>
 </resources>
