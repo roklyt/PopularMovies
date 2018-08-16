@@ -17,19 +17,16 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
     /* List for all reviews*/
     private List<Reviews> ReviewsList;
 
-    private final ReviewAdapterOnClickHandler ClickHandler;
-
     /* Interface for the on click handler */
     public interface ReviewAdapterOnClickHandler {
         void onClick(Reviews currentReview);
     }
 
-    public ReviewAdapter(ReviewAdapterOnClickHandler  clickHandler, List<Reviews> reviewsList) {
-        ClickHandler = clickHandler;
+    public ReviewAdapter(List<Reviews> reviewsList) {
         ReviewsList = reviewsList;
     }
 
-    public class ReviewAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ReviewAdapterViewHolder extends RecyclerView.ViewHolder{
         TextView AuthorTextView;
         TextView ContentTextView;
 
@@ -37,13 +34,6 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
             super(view);
             AuthorTextView = view.findViewById(R.id.tv_author);
             ContentTextView = view.findViewById(R.id.tv_content);
-            view.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Reviews currentReview = ReviewsList.get(getAdapterPosition());
-            ClickHandler.onClick(currentReview);
         }
     }
 

@@ -1,10 +1,12 @@
 package com.example.android.popularmovies;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -33,7 +35,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.ReviewAdapter.ReviewAdapterOnClickHandler, com.example.android.popularmovies.Adapter.TrailerAdapter.TrailerAdapterOnClickHandler{
+public class DetailActivity extends AppCompatActivity implements  com.example.android.popularmovies.Adapter.TrailerAdapter.TrailerAdapterOnClickHandler{
 
     /* Recycleview adapter*/
     private com.example.android.popularmovies.Adapter.ReviewAdapter ReviewAdapter;
@@ -104,7 +106,7 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
             RecyclerViewReviews.setLayoutManager(new LinearLayoutManager(this));
 
             /* Add the review adapter to the recyclerview.*/
-            ReviewAdapter = new ReviewAdapter(this, ReviewsList);
+            ReviewAdapter = new ReviewAdapter(ReviewsList);
             RecyclerViewReviews.setAdapter(ReviewAdapter);
 
             /* If network is available proceed else show error message */
@@ -145,13 +147,18 @@ public class DetailActivity extends AppCompatActivity implements com.example.and
     }
 
     @Override
-    public void onClick(Reviews currentReview) {
-        Toast.makeText(this, "Da kommt enoch was", Toast.LENGTH_LONG).show();
-    }
-
-    @Override
     public void onClick(Trailer currentTrailer) {
-        Toast.makeText(this, "Da kommt enoch was", Toast.LENGTH_LONG).show();
+            String id = currentTrailer.getKey();
+
+            Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+            Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://www.youtube.com/watch?v=" + id));
+            try {
+                this.startActivity(appIntent);
+            } catch (ActivityNotFoundException ex) {
+                this.startActivity(webIntent);
+            }
+
     }
 
 
