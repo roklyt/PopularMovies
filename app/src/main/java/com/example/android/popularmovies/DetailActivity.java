@@ -11,12 +11,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,6 +46,8 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     private com.example.android.popularmovies.Adapter.TrailerAdapter TrailerAdapter;
     /* List of all trailer*/
     private List<Trailer> TrailerList = new ArrayList<>();
+
+    private ShareActionProvider mShareActionProvider;
 
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerViewReviews;
@@ -122,6 +125,41 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
             Toast.makeText(this, getString(R.string.error_empty_extra), Toast.LENGTH_SHORT).show();
             finish();
         }
+    }
+
+    @Override
+    // This method initialize the contents of the Activity's options menu.
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate menu resource file.
+        getMenuInflater().inflate(R.menu.detail_menu, menu);
+
+        // Locate MenuItem with ShareActionProvider
+        MenuItem item = menu.findItem(R.id.menu_item_share);
+
+        // Fetch and store ShareActionProvider
+        mShareActionProvider = (ShareActionProvider) item.getActionProvider();
+
+        // Return true to display menu
+        return true;
+    }
+
+    // Call to update the share intent
+    private void setShareIntent(Intent shareIntent) {
+        if (mShareActionProvider != null) {
+            mShareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
+    /* start the settings activity if the user click the settings symbol. The if is not necessary here because we have only one button but i implemented it for further use */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /* Check network */
@@ -278,6 +316,18 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 showTrailerDataView();
                 /* set the new data to the adapter */
                 TrailerAdapter.setTrailerData(trailerData);
+
+
+
+                String shareUrl = "http://www.youtube.com/watch?v=" + trailerData.get(0).getKey();
+
+                Intent shareIntent = new Intent();
+                shareIntent.setAction(Intent.ACTION_SEND);
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareUrl);
+                shareIntent.setType("text/plain");
+
+                setShareIntent(shareIntent);
+
             } else {
                 showTrailerErrorMessage();
             }
