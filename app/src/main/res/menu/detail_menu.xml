@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.android.sunshine.DetailActivity">
     <item
-        android:id="@+id/menu_item_share"
-        android:title="Share"
-        app:actionProviderClass="android.widget.ShareActionProvider"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/action_share"
+        android:icon="@drawable/baseline_share_white_36"
+        android:title="@string/share_movie"
+        app:showAsAction="always"/>
 </menu>

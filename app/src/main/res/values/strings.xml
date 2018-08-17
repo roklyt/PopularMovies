@@ -5,6 +5,8 @@
     <string name="settings_menu_item">Settings</string>
     <string name="settings_title">Movie Settings</string>
 
+    <string name="share_movie">Share</string>
+
     // Detail activity  header text
     <string name="trailer_rv_header">Trailer:</string>
     <string name="trailer_header">Name: </string>

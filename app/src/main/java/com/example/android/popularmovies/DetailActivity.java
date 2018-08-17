@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
@@ -47,7 +48,10 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     /* List of all trailer*/
     private List<Trailer> TrailerList = new ArrayList<>();
 
-    private ShareActionProvider mShareActionProvider;
+    private MenuItem ShareItem;
+
+    private String YoutubeKey = "";
+
 
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerViewReviews;
@@ -134,20 +138,26 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         getMenuInflater().inflate(R.menu.detail_menu, menu);
 
         // Locate MenuItem with ShareActionProvider
-        MenuItem item = menu.findItem(R.id.menu_item_share);
+        ShareItem = menu.findItem(R.id.action_share);
 
-        // Fetch and store ShareActionProvider
-        mShareActionProvider = (ShareActionProvider) item.getActionProvider();
-
-        // Return true to display menu
+        ShareItem.setIntent(createShareIntent());
         return true;
     }
 
     // Call to update the share intent
-    private void setShareIntent(Intent shareIntent) {
-        if (mShareActionProvider != null) {
-            mShareActionProvider.setShareIntent(shareIntent);
-        }
+    private Intent createShareIntent() {
+
+        String shareUrl = "http://www.youtube.com/watch?v=" + YoutubeKey;
+
+        Intent shareIntent = ShareCompat.IntentBuilder.from(this)
+                .setType("text/plain")
+                .setText(shareUrl)
+                .getIntent();
+        return shareIntent;
+    }
+
+    private void updateShareIntent(){
+        ShareItem.setIntent(createShareIntent());
     }
 
     /* start the settings activity if the user click the settings symbol. The if is not necessary here because we have only one button but i implemented it for further use */
@@ -317,17 +327,8 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 /* set the new data to the adapter */
                 TrailerAdapter.setTrailerData(trailerData);
 
-
-
-                String shareUrl = "http://www.youtube.com/watch?v=" + trailerData.get(0).getKey();
-
-                Intent shareIntent = new Intent();
-                shareIntent.setAction(Intent.ACTION_SEND);
-                shareIntent.putExtra(Intent.EXTRA_TEXT, shareUrl);
-                shareIntent.setType("text/plain");
-
-                setShareIntent(shareIntent);
-
+                YoutubeKey = trailerData.get(0).getKey();
+                updateShareIntent();
             } else {
                 showTrailerErrorMessage();
             }
