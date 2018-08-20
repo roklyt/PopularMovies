@@ -84,21 +84,33 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:hint="average_image" />
 
-        <TextView
-            android:id="@+id/synopsis_text"
-            android:layout_width="match_parent"
+        <Button
+            android:id="@+id/favorite_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:text="Button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/poster_image" />
+
+        <TextView
+            android:id="@+id/synopsis_text"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
             android:textAppearance="@android:style/TextAppearance"
             android:textColor="@color/colorText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/poster_image"
+            app:layout_constraintTop_toBottomOf="@+id/favorite_button"
             tools:hint="synopsis_text" />
 
         <TextView

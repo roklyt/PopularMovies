@@ -16,14 +16,16 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.ShareActionProvider;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovies.Adapter.ReviewAdapter;
 import com.example.android.popularmovies.Adapter.TrailerAdapter;
+import com.example.android.popularmovies.Favorites.AppDatabase;
+import com.example.android.popularmovies.Favorites.FavoriteEntry;
 import com.example.android.popularmovies.data.Reviews;
 import com.example.android.popularmovies.data.Trailer;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -52,6 +54,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     private String YoutubeKey = "";
 
+    Button FavoriteButton;
 
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerViewReviews;
@@ -63,6 +66,8 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     private String MovieId;
 
+    private AppDatabase FavoriteDb;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +76,19 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         Intent intent = getIntent();
         if (intent.hasExtra(Movies.PARCELABLE_KEY)) {
             /* Get the current movies data from the intent*/
-            Movies currentMovies = intent.getParcelableExtra(Movies.PARCELABLE_KEY);
+            final Movies currentMovies = intent.getParcelableExtra(Movies.PARCELABLE_KEY);
 
             MovieId = currentMovies.getId();
+
+            FavoriteDb = AppDatabase.getInstance(getApplicationContext());
+
+            FavoriteButton = findViewById(R.id.favorite_button);
+            FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onFavoriteButtonClicked(currentMovies);
+                }
+            });
 
             /* Publish all data into their views */
             ImageView posterView = findViewById(R.id.poster_image);
@@ -207,6 +222,13 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 this.startActivity(webIntent);
             }
 
+    }
+
+    public void onFavoriteButtonClicked(Movies currentMovies){
+
+        FavoriteEntry favoriteEntity = new FavoriteEntry(currentMovies.getId(), currentMovies.getTitle());
+        FavoriteDb.favoriteDao().insertFavorite(favoriteEntity);
+        finish();
     }
 
 
