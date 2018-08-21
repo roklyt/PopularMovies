@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popularmovies.Adapter.MovieAdapter;
+import com.example.android.popularmovies.Favorites.AppDatabase;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.data.Movies;
 import com.example.android.popularmovies.utilities.MovieJsonUtils;
@@ -43,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
     private TextView ErrorMessageDisplay;
     /* Progress bar as indicator */
     private ProgressBar LoadingIndicator;
+
+    private AppDatabase FavoritesDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
             Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_LONG).show();
             showErrorMessage();
         }
+
+        FavoritesDb = AppDatabase.getInstance(getApplicationContext());
     }
 
     /* Calculate how many thumbnails fit on the screen */
@@ -148,6 +153,15 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         }
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // COMPLETED (3) Call the adapter's setTasks method using the result
+        // of the loadAllTasks method from the taskDao
+        mAdapter.setTasks(mDb.taskDao().loadAllTasks());
+    }
+
 
     /* Async Task to make an url request against the tmdb to get the movie list*/
     public class FetchMoviesTask extends AsyncTask<String, Void, List<Movies>> {
