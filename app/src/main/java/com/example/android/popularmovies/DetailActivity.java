@@ -228,7 +228,14 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
         FavoriteEntry favoriteEntity = new FavoriteEntry(currentMovies.getId(), currentMovies.getTitle());
         FavoriteDb.favoriteDao().insertFavorite(favoriteEntity);
-        finish();
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                FavoriteDb.favoriteDao().insertFavorite(favoriteEntity);
+                finish();
+            }
+        });
     }
 
 

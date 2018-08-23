@@ -62,19 +62,30 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         /* set grid layout manager to the recyclerview */
         RecyclerView.setLayoutManager(new GridLayoutManager(this, calculateSpan()));
 
-        /* Add the Movie adapter to the recyclerview.*/
-        MovieAdapter = new MovieAdapter(this, MoviesList);
-        RecyclerView.setAdapter(MovieAdapter);
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        /* If network is available proceed else show error message */
-        if (checkNetwork()) {
-            loadMovieData();
-        } else {
-            Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_LONG).show();
-            showErrorMessage();
+        String orderBy = sharedPrefs.getString(
+                getString(R.string.settings_order_key),
+                getString(R.string.settings_order_default));
+
+        if(orderBy.equals(R.string.settings_order_favorites_value)){
+            FavoritesDb = AppDatabase.getInstance(getApplicationContext());
+
+
+        }else{
+            /* Add the Movie adapter to the recyclerview.*/
+            MovieAdapter = new MovieAdapter(this, MoviesList);
+            RecyclerView.setAdapter(MovieAdapter);
+
+            /* If network is available proceed else show error message */
+            if (checkNetwork()) {
+                loadMovieData();
+            } else {
+                Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_LONG).show();
+                showErrorMessage();
+            }
+
         }
-
-        FavoritesDb = AppDatabase.getInstance(getApplicationContext());
     }
 
     /* Calculate how many thumbnails fit on the screen */
@@ -157,9 +168,24 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
     @Override
     protected void onResume() {
         super.onResume();
-        // COMPLETED (3) Call the adapter's setTasks method using the result
-        // of the loadAllTasks method from the taskDao
-        mAdapter.setTasks(mDb.taskDao().loadAllTasks());
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                // COMPLETED (6) Move the logic into the run method and
+                // Extract the list of tasks to a final variable
+                final List<FavoritesEntry> favorites = FavoritesDb.favoriteDao().loadAllFavorites();
+                // COMPLETED (7) Wrap the setTask call in a call to runOnUiThread
+                // We will be able to simplify this once we learn more
+                // about Android Architecture Components
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //MovieAdapter.setMovieData(favorites);
+                    }
+                });
+            }
+        });
     }
 
 

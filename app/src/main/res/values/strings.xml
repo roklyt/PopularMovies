@@ -26,6 +26,9 @@
     <string name="settings_order_rated_label">Highest rated</string>
     <string name="settings_order_rated_value" translatable="false">top_rated</string>
 
+    <string name="settings_order_favorites_label">Favorites</string>
+    <string name="settings_order_favorites_value" translatable="false">favorites</string>
+
     // Strings for the api key settings
     <string name="settings_api_key_label">Api Key</string>
     <string name="settings_api_key_key" translatable="false">api_key</string>
