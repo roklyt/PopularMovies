@@ -1,5 +1,7 @@
 package com.example.android.popularmovies;
 
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,11 +59,13 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     Button FavoriteButton;
 
+    private Boolean Favorite = false;
+
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerViewReviews;
     private android.support.v7.widget.RecyclerView RecyclerViewTrailer;
 
-    /* recycler trailer progrss bar and error message views */
+    /* recycler trailer progress bar and error message views */
     private TextView TrailerErrorTextView;
     private ProgressBar TrailerProgressBar;
 
@@ -83,12 +88,28 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
             FavoriteDb = AppDatabase.getInstance(getApplicationContext());
 
             FavoriteButton = findViewById(R.id.favorite_button);
-            FavoriteButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onFavoriteButtonClicked(currentMovies);
-                }
-            });
+
+            if(intent.hasExtra(MainActivity.FavoriteKey)){
+                Favorite = intent.getBooleanExtra(MainActivity.FavoriteKey,false);
+            }
+
+            if(Favorite){
+                FavoriteButton.setText("un favorite");
+                FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onFavoriteDeleteButtonClicked(currentMovies);
+                    }
+                });
+            }else{
+                FavoriteButton.setText("favorite");
+                FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onFavoriteSetButtonClicked(currentMovies);
+                    }
+                });
+            }
 
             /* Publish all data into their views */
             ImageView posterView = findViewById(R.id.poster_image);
@@ -164,11 +185,10 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
         String shareUrl = "http://www.youtube.com/watch?v=" + YoutubeKey;
 
-        Intent shareIntent = ShareCompat.IntentBuilder.from(this)
+        return ShareCompat.IntentBuilder.from(this)
                 .setType("text/plain")
                 .setText(shareUrl)
                 .getIntent();
-        return shareIntent;
     }
 
     private void updateShareIntent(){
@@ -224,20 +244,47 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     }
 
-    public void onFavoriteButtonClicked(Movies currentMovies){
+    public void onFavoriteDeleteButtonClicked(Movies currentMovies){
+        final String currentMovieId = currentMovies.getId();
 
-        FavoriteEntry favoriteEntity = new FavoriteEntry(currentMovies.getId(), currentMovies.getTitle());
-        FavoriteDb.favoriteDao().insertFavorite(favoriteEntity);
+        final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentMovieId);
+        final AddFavoritesViewModel viewModel = ViewModelProviders.of(this, factory).get(AddFavoritesViewModel.class);
 
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+        viewModel.getFavorite().observe(this, new Observer<FavoriteEntry>() {
             @Override
-            public void run() {
-                FavoriteDb.favoriteDao().insertFavorite(favoriteEntity);
+            public void onChanged(@Nullable FavoriteEntry favoriteEntry) {
+                viewModel.getFavorite().removeObserver(this);
+                FavoriteDb.favoriteDao().deleteFavorite(favoriteEntry);
                 finish();
             }
         });
     }
 
+    public void onFavoriteSetButtonClicked(final Movies currentMovies){
+
+        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                final FavoriteEntry favorite = new FavoriteEntry(
+                        currentMovies.getId(),
+                        currentMovies.getTitle(),
+                        currentMovies.getPosterPath(),
+                        currentMovies.getPublishedDate(),
+                        currentMovies.getAverage(),
+                        currentMovies.getSynopsis());
+
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //FavoriteDb.favoriteDao().deleteFavorite(favorite);
+                        FavoriteDb.favoriteDao().insertFavorite(favorite);
+                        finish();
+                    }
+                });
+            }
+        });
+    }
 
     /* Async Task to make an url request against the tmdb to get the reviews list*/
     public class FetchMoviesReviews extends AsyncTask<String, Void, List<Reviews>> {
@@ -334,12 +381,8 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 String jsonTrailerResponse = NetworkUtils
                         .getResponseFromHttpUrl(reviewRequestUrl);
 
-
-                /* Everything is fine we can parse the json to get our review*/
-                List<Trailer> trailerDataList = TrailerJsonUtils
+                return TrailerJsonUtils
                         .getTrailerListFromJson(jsonTrailerResponse);
-
-                return trailerDataList;
 
             } catch (Exception e) {
                 e.printStackTrace();

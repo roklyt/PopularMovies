@@ -1,5 +1,8 @@
 package com.example.android.popularmovies;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -8,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -22,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.android.popularmovies.Adapter.MovieAdapter;
 import com.example.android.popularmovies.Favorites.AppDatabase;
+import com.example.android.popularmovies.Favorites.FavoriteEntry;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.data.Movies;
 import com.example.android.popularmovies.utilities.MovieJsonUtils;
@@ -47,6 +52,10 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
 
     private AppDatabase FavoritesDb;
 
+    private Boolean Favorite;
+
+    public static final String FavoriteKey = "favorite";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,21 +71,21 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         /* set grid layout manager to the recyclerview */
         RecyclerView.setLayoutManager(new GridLayoutManager(this, calculateSpan()));
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        /* Add the Movie adapter to the recyclerview.*/
+        MovieAdapter = new MovieAdapter(this, MoviesList);
+        RecyclerView.setAdapter(MovieAdapter);
 
-        String orderBy = sharedPrefs.getString(
-                getString(R.string.settings_order_key),
-                getString(R.string.settings_order_default));
+        FavoritesDb = AppDatabase.getInstance(getApplicationContext());
 
-        if(orderBy.equals(R.string.settings_order_favorites_value)){
-            FavoritesDb = AppDatabase.getInstance(getApplicationContext());
+        String orderBy = getOrderBy();
 
-
+        if(orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))){
+            Favorite = true;
+            executeLoadAllFavorites();
+            showMovieDataView();
+            LoadingIndicator.setVisibility(View.INVISIBLE);
         }else{
-            /* Add the Movie adapter to the recyclerview.*/
-            MovieAdapter = new MovieAdapter(this, MoviesList);
-            RecyclerView.setAdapter(MovieAdapter);
-
+            Favorite = false;
             /* If network is available proceed else show error message */
             if (checkNetwork()) {
                 loadMovieData();
@@ -85,6 +94,10 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
                 showErrorMessage();
             }
 
+        }
+
+        if(orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))){
+            executeLoadAllFavorites();
         }
     }
 
@@ -142,6 +155,7 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         Class destinationClass = DetailActivity.class;
         Intent intentToStartDetailActivity = new Intent(this, destinationClass);
         intentToStartDetailActivity.putExtra(Movies.PARCELABLE_KEY, currentMovie);
+        intentToStartDetailActivity.putExtra(FavoriteKey, Favorite);
         startActivity(intentToStartDetailActivity);
     }
 
@@ -165,27 +179,36 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-        AppExecutors.getInstance().diskIO().execute(new Runnable() {
+    private void executeLoadAllFavorites(){
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getFavorites().observe(this, new Observer<List<FavoriteEntry>>() {
             @Override
-            public void run() {
-                // COMPLETED (6) Move the logic into the run method and
-                // Extract the list of tasks to a final variable
-                final List<FavoritesEntry> favorites = FavoritesDb.favoriteDao().loadAllFavorites();
-                // COMPLETED (7) Wrap the setTask call in a call to runOnUiThread
-                // We will be able to simplify this once we learn more
-                // about Android Architecture Components
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //MovieAdapter.setMovieData(favorites);
-                    }
-                });
+            public void onChanged(@Nullable List<FavoriteEntry> favoriteEntries) {
+                final List<Movies> movies = new ArrayList<>();
+                for(FavoriteEntry favorite : favoriteEntries){
+
+                    movies.add(new Movies(
+                            favorite.getTitle(),
+                            favorite.getMovieId(),
+                            favorite.getPosterPath(),
+                            favorite.getPublishedDate(),
+                            favorite.getAverage(),
+                            favorite.getSynopsis()));
+                }
+
+                MovieAdapter.setMovieData(movies);
             }
         });
+    }
+
+    private String getOrderBy(){
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        String orderBy = sharedPrefs.getString(
+                getString(R.string.settings_order_key),
+                getString(R.string.settings_order_default));
+
+        return orderBy;
     }
 
 
