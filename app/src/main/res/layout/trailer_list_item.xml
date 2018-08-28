@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/touch_selector"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/touch_selector">
 
 
     <ImageView
@@ -59,7 +58,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Medium"
         android:textColor="@color/colorText"
         app:layout_constraintStart_toEndOf="@+id/iv_play_button"
-        app:layout_constraintTop_toBottomOf="@+id/tv_video_name"/>
+        app:layout_constraintTop_toBottomOf="@+id/tv_video_name" />
 
     <TextView
         android:id="@+id/tv_video_type"

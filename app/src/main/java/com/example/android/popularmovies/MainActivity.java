@@ -38,6 +38,7 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.MovieAdapter.MovieAdapterOnClickHandler {
 
+    AppDatabase FavoritesDb;
     /* RecycleView adapter*/
     private MovieAdapter MovieAdapter;
     /* List of all movies*/
@@ -48,8 +49,6 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
     private TextView ErrorMessageDisplay;
     /* Progress bar as indicator */
     private ProgressBar LoadingIndicator;
-
-    AppDatabase FavoritesDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,11 +73,11 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
 
         String orderBy = getOrderBy();
 
-        if(orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))){
+        if (orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))) {
             executeLoadAllFavorites();
             showMovieDataView();
             LoadingIndicator.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             /* If network is available proceed else show error message */
             if (checkNetwork()) {
                 loadMovieData();
@@ -89,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
 
         }
 
-        if(orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))){
+        if (orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))) {
             executeLoadAllFavorites();
         }
     }
@@ -171,14 +170,14 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         return super.onOptionsItemSelected(item);
     }
 
-    private void executeLoadAllFavorites(){
+    private void executeLoadAllFavorites() {
         MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         viewModel.getFavorites().observe(this, new Observer<List<FavoriteEntry>>() {
             @Override
             public void onChanged(@Nullable List<FavoriteEntry> favoriteEntries) {
                 final List<Movies> movies = new ArrayList<>();
                 assert favoriteEntries != null;
-                for(FavoriteEntry favorite : favoriteEntries){
+                for (FavoriteEntry favorite : favoriteEntries) {
 
                     movies.add(new Movies(
                             favorite.getTitle(),
@@ -194,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         });
     }
 
-    private String getOrderBy(){
+    private String getOrderBy() {
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         return sharedPrefs.getString(

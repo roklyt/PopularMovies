@@ -10,11 +10,11 @@ public class AddFavoritesViewModel extends ViewModel {
 
     private LiveData<FavoriteEntry> favorite;
 
-    public AddFavoritesViewModel(AppDatabase database, String movieId){
+    public AddFavoritesViewModel(AppDatabase database, String movieId) {
         favorite = database.favoriteDao().loadFavoriteByMovieId(movieId);
     }
 
-    public LiveData<FavoriteEntry> getFavorite(){
+    public LiveData<FavoriteEntry> getFavorite() {
         return favorite;
     }
 

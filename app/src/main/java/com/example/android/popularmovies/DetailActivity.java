@@ -42,8 +42,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity implements  com.example.android.popularmovies.Adapter.TrailerAdapter.TrailerAdapterOnClickHandler{
+public class DetailActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.TrailerAdapter.TrailerAdapterOnClickHandler {
 
+    private static MenuItem ShareItem;
+    private static String YoutubeKey = "";
+    Button FavoriteButton;
     /* Recycleview adapter*/
     private com.example.android.popularmovies.Adapter.ReviewAdapter ReviewAdapter;
     /* List of all reviews*/
@@ -52,13 +55,6 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     private com.example.android.popularmovies.Adapter.TrailerAdapter TrailerAdapter;
     /* List of all trailer*/
     private List<Trailer> TrailerList = new ArrayList<>();
-
-    private static MenuItem ShareItem;
-
-    private static String YoutubeKey = "";
-
-    Button FavoriteButton;
-
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerViewReviews;
     private android.support.v7.widget.RecyclerView RecyclerViewTrailer;
@@ -181,7 +177,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 .getIntent();
     }
 
-    private void updateShareIntent(){
+    private void updateShareIntent() {
         ShareItem.setIntent(createShareIntent());
     }
 
@@ -219,57 +215,57 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     @Override
     public void onClick(Trailer currentTrailer) {
-            String id = currentTrailer.getKey();
+        String id = currentTrailer.getKey();
 
-            Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
-            Intent webIntent = new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("http://www.youtube.com/watch?v=" + id));
-            try {
-                this.startActivity(appIntent);
-            } catch (ActivityNotFoundException ex) {
-                this.startActivity(webIntent);
-            }
+        Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("vnd.youtube:" + id));
+        Intent webIntent = new Intent(Intent.ACTION_VIEW,
+                Uri.parse("http://www.youtube.com/watch?v=" + id));
+        try {
+            this.startActivity(appIntent);
+        } catch (ActivityNotFoundException ex) {
+            this.startActivity(webIntent);
+        }
 
     }
 
     //Method to recognize if the movie is a favorite or not.
-    private void isFavorite(final Movies currentMovies){
-            final String currentMovieId = currentMovies.getId();
-            final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentMovieId);
-            final AddFavoritesViewModel viewModel = ViewModelProviders.of(this, factory).get(AddFavoritesViewModel.class);
-            viewModel.getFavorite().observe(this, new Observer<FavoriteEntry>() {
-                @Override
-                public void onChanged(@Nullable final FavoriteEntry favoriteEntry) {
-                    if(favoriteEntry == null){
-                        //If it is not a favorite configure the set favorite click listener
-                        FavoriteButton.setText(R.string.mark_as_favorite_button);
-                        FavoriteButton.setBackgroundColor(getResources().getColor(R.color.rating_circle));
-                        FavoriteButton.setTextColor(getResources().getColor(R.color.colorBackground));
-                        FavoriteButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                onFavoriteSetButtonClicked(currentMovies);
-                            }
-                        });
-                    }else{
-                        //If is is already a favorite configure the delete favorite button
-                        FavoriteButton.setText(R.string.un_mark_as_favorite_button);
-                        FavoriteButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
-                        FavoriteButton.setTextColor(getResources().getColor(R.color.colorText));
-                        FavoriteButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                onFavoriteDeleteButtonClicked(favoriteEntry);
-                            }
-                        });
+    private void isFavorite(final Movies currentMovies) {
+        final String currentMovieId = currentMovies.getId();
+        final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentMovieId);
+        final AddFavoritesViewModel viewModel = ViewModelProviders.of(this, factory).get(AddFavoritesViewModel.class);
+        viewModel.getFavorite().observe(this, new Observer<FavoriteEntry>() {
+            @Override
+            public void onChanged(@Nullable final FavoriteEntry favoriteEntry) {
+                if (favoriteEntry == null) {
+                    //If it is not a favorite configure the set favorite click listener
+                    FavoriteButton.setText(R.string.mark_as_favorite_button);
+                    FavoriteButton.setBackgroundColor(getResources().getColor(R.color.rating_circle));
+                    FavoriteButton.setTextColor(getResources().getColor(R.color.colorBackground));
+                    FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            onFavoriteSetButtonClicked(currentMovies);
+                        }
+                    });
+                } else {
+                    //If is is already a favorite configure the delete favorite button
+                    FavoriteButton.setText(R.string.un_mark_as_favorite_button);
+                    FavoriteButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                    FavoriteButton.setTextColor(getResources().getColor(R.color.colorText));
+                    FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            onFavoriteDeleteButtonClicked(favoriteEntry);
+                        }
+                    });
 
-                    }
                 }
-            });
+            }
+        });
     }
 
     // Delete the movie from the favorite database
-    public void onFavoriteDeleteButtonClicked(FavoriteEntry currentFavorite){
+    public void onFavoriteDeleteButtonClicked(FavoriteEntry currentFavorite) {
         final String currentFavoriteMovieId = currentFavorite.getMovieId();
 
         final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentFavoriteMovieId);
@@ -289,7 +285,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     }
 
     //Add the movie to the database
-    public void onFavoriteSetButtonClicked(final Movies currentMovies){
+    public void onFavoriteSetButtonClicked(final Movies currentMovies) {
         //Show a toast that the movie will be added ro the database
         Toast.makeText(this, String.format(getString(R.string.movie_marked_toast), currentMovies.getTitle()), Toast.LENGTH_LONG).show();
 
@@ -318,14 +314,28 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         });
     }
 
-    private void showReviewData(){
+    private void showReviewData() {
         RecyclerViewReviews.setVisibility(View.VISIBLE);
         ReviewErrorTextView.setVisibility(View.INVISIBLE);
     }
 
-    private void showReviewErrorMessage(){
+    private void showReviewErrorMessage() {
         RecyclerViewReviews.setVisibility(View.INVISIBLE);
         ReviewErrorTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void showTrailerDataView() {
+        /* First, make sure the error is invisible */
+        TrailerErrorTextView.setVisibility(View.INVISIBLE);
+        /* Then, make sure the movie data is visible */
+        RecyclerViewTrailer.setVisibility(View.VISIBLE);
+    }
+
+    private void showTrailerErrorMessage() {
+        /* First, hide the currently visible data */
+        RecyclerViewTrailer.setVisibility(View.INVISIBLE);
+        /* Then, show the error */
+        TrailerErrorTextView.setVisibility(View.VISIBLE);
     }
 
     /* Async Task to make an url request against the tmdb to get the reviews list*/
@@ -377,20 +387,6 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 showReviewErrorMessage();
             }
         }
-    }
-
-    private void showTrailerDataView() {
-        /* First, make sure the error is invisible */
-        TrailerErrorTextView.setVisibility(View.INVISIBLE);
-        /* Then, make sure the movie data is visible */
-        RecyclerViewTrailer.setVisibility(View.VISIBLE);
-    }
-
-    private void showTrailerErrorMessage() {
-        /* First, hide the currently visible data */
-        RecyclerViewTrailer.setVisibility(View.INVISIBLE);
-        /* Then, show the error */
-        TrailerErrorTextView.setVisibility(View.VISIBLE);
     }
 
     /* Async Task to make an url request against the tmdb to get the video list*/

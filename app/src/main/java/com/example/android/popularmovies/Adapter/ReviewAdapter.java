@@ -17,24 +17,8 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
     /* List for all reviews*/
     private List<Reviews> ReviewsList;
 
-    /* Interface for the on click handler */
-    public interface ReviewAdapterOnClickHandler {
-        void onClick(Reviews currentReview);
-    }
-
     public ReviewAdapter(List<Reviews> reviewsList) {
         ReviewsList = reviewsList;
-    }
-
-    public class ReviewAdapterViewHolder extends RecyclerView.ViewHolder{
-        TextView AuthorTextView;
-        TextView ContentTextView;
-
-        public ReviewAdapterViewHolder(View view) {
-            super(view);
-            AuthorTextView = view.findViewById(R.id.tv_author);
-            ContentTextView = view.findViewById(R.id.tv_content);
-        }
     }
 
     @Override
@@ -66,5 +50,17 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewAdap
     public void setReviewData(List<Reviews> reviewsData) {
         ReviewsList = reviewsData;
         notifyDataSetChanged();
+    }
+
+
+    public class ReviewAdapterViewHolder extends RecyclerView.ViewHolder {
+        TextView AuthorTextView;
+        TextView ContentTextView;
+
+        public ReviewAdapterViewHolder(View view) {
+            super(view);
+            AuthorTextView = view.findViewById(R.id.tv_author);
+            ContentTextView = view.findViewById(R.id.tv_content);
+        }
     }
 }
