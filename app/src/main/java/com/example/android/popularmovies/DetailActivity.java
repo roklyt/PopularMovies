@@ -16,7 +16,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -72,8 +71,10 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     private TextView ReviewErrorTextView;
     private ProgressBar ReviewProgressBar;
 
+    //Movie id to to proceed the review and trailer request for the correct movie
     private String MovieId;
 
+    //Database to store all favorites or delete them
     private AppDatabase FavoriteDb;
 
     @Override
@@ -86,12 +87,16 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
             /* Get the current movies data from the intent*/
             final Movies currentMovies = intent.getParcelableExtra(Movies.PARCELABLE_KEY);
 
+            //Get the movie id's for the http requests
             MovieId = currentMovies.getId();
 
+            //Get instance from favorite database
             FavoriteDb = AppDatabase.getInstance(getApplicationContext());
 
+            //Find favorite button
             FavoriteButton = findViewById(R.id.favorite_button);
 
+            //Check is current movie is a favorite or not
             isFavorite(currentMovies);
 
             /* Publish all data into their views */
@@ -227,6 +232,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     }
 
+    //Method to recognize if the movie is a favorite or not.
     private void isFavorite(final Movies currentMovies){
             final String currentMovieId = currentMovies.getId();
             final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentMovieId);
@@ -235,8 +241,10 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 @Override
                 public void onChanged(@Nullable final FavoriteEntry favoriteEntry) {
                     if(favoriteEntry == null){
-                        Log.d("isFavorite", "Favorite entry is null");
+                        //If it is not a favorite configure the set favorite click listener
                         FavoriteButton.setText(R.string.mark_as_favorite_button);
+                        FavoriteButton.setBackgroundColor(getResources().getColor(R.color.rating_circle));
+                        FavoriteButton.setTextColor(getResources().getColor(R.color.colorBackground));
                         FavoriteButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -244,8 +252,10 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                             }
                         });
                     }else{
-                        Log.d("isFavorite", "Favorite entry is not null");
+                        //If is is already a favorite configure the delete favorite button
                         FavoriteButton.setText(R.string.un_mark_as_favorite_button);
+                        FavoriteButton.setBackgroundColor(getResources().getColor(R.color.colorPrimaryDark));
+                        FavoriteButton.setTextColor(getResources().getColor(R.color.colorText));
                         FavoriteButton.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -258,12 +268,14 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
             });
     }
 
+    // Delete the movie from the favorite database
     public void onFavoriteDeleteButtonClicked(FavoriteEntry currentFavorite){
         final String currentFavoriteMovieId = currentFavorite.getMovieId();
 
         final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentFavoriteMovieId);
         final AddFavoritesViewModel viewModel = ViewModelProviders.of(this, factory).get(AddFavoritesViewModel.class);
 
+        //Show a toast message that the movie will be deleted from the database
         Toast.makeText(this, String.format(getString(R.string.movie_un_marked_toast), currentFavorite.getTitle()), Toast.LENGTH_LONG).show();
 
         viewModel.getFavorite().observe(this, new Observer<FavoriteEntry>() {
@@ -276,13 +288,15 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         });
     }
 
+    //Add the movie to the database
     public void onFavoriteSetButtonClicked(final Movies currentMovies){
-
+        //Show a toast that the movie will be added ro the database
         Toast.makeText(this, String.format(getString(R.string.movie_marked_toast), currentMovies.getTitle()), Toast.LENGTH_LONG).show();
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
             public void run() {
+                //Convert movies object into favorite object to store it in the database
                 final FavoriteEntry favorite = new FavoriteEntry(
                         currentMovies.getId(),
                         currentMovies.getTitle(),
@@ -295,7 +309,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        //FavoriteDb.favoriteDao().deleteFavorite(favorite);
+                        //Insert favorite to database and close the details activity
                         FavoriteDb.favoriteDao().insertFavorite(favorite);
                         finish();
                     }

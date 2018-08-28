@@ -16,35 +16,13 @@ import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
+    private final MovieAdapterOnClickHandler ClickHandler;
     /* List for all movies*/
     private List<Movies> MoviesList;
-
-    private final MovieAdapterOnClickHandler ClickHandler;
-
-    /* Interface for the on click handler */
-    public interface MovieAdapterOnClickHandler {
-        void onClick(Movies currentMovie);
-    }
 
     public MovieAdapter(MovieAdapterOnClickHandler clickHandler, List<Movies> moviesList) {
         ClickHandler = clickHandler;
         MoviesList = moviesList;
-    }
-
-    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        ImageView MovieImageView;
-
-        public MovieAdapterViewHolder(View view) {
-            super(view);
-            MovieImageView = view.findViewById(R.id.poster_image_recyclerview);
-            view.setOnClickListener(this);
-        }
-
-        @Override
-        public void onClick(View v) {
-            Movies currentMovie = MoviesList.get(getAdapterPosition());
-            ClickHandler.onClick(currentMovie);
-        }
     }
 
     @Override
@@ -81,5 +59,26 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     public void setMovieData(List<Movies> movieData) {
         MoviesList = movieData;
         notifyDataSetChanged();
+    }
+
+    /* Interface for the on click handler */
+    public interface MovieAdapterOnClickHandler {
+        void onClick(Movies currentMovie);
+    }
+
+    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        ImageView MovieImageView;
+
+        public MovieAdapterViewHolder(View view) {
+            super(view);
+            MovieImageView = view.findViewById(R.id.poster_image_recyclerview);
+            view.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Movies currentMovie = MoviesList.get(getAdapterPosition());
+            ClickHandler.onClick(currentMovie);
+        }
     }
 }
