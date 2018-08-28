@@ -15,6 +15,10 @@
     <string name="review_author">Author: </string>
     <string name="review_content">Review: </string>
 
+    //Detail activity favorite button text
+    <string name="mark_as_favorite_button">Mark as favorite</string>
+    <string name="un_mark_as_favorite_button">Delete favorite</string>
+
     // Strings for order by settings
     <string name="settings_order_label">Ordered by</string>
     <string name="settings_order_key" translatable="false">ordered_by</string>
@@ -39,4 +43,11 @@
     <string name="error_empty_extra">There are no informations about this movie</string>
     <string name="error_no_data">We could not receive any data.\n\tPlease try again Later</string>
     <string name="error_no_network">No internet connection.</string>
+
+    <string name="no_trailer">There are no trailer</string>
+    <string name="no_reviews">There are no reviews</string>
+
+    //Toast messages for favorite mark ans un mark
+    <string name="movie_marked_toast">The movie %s was added to your favorites</string>
+    <string name="movie_un_marked_toast" formatted="false">The movie %s was removed from the favorites</string>
 </resources>

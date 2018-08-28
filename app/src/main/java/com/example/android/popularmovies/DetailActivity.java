@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -53,13 +54,11 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     /* List of all trailer*/
     private List<Trailer> TrailerList = new ArrayList<>();
 
-    private MenuItem ShareItem;
+    private static MenuItem ShareItem;
 
-    private String YoutubeKey = "";
+    private static String YoutubeKey = "";
 
     Button FavoriteButton;
-
-    private Boolean Favorite = false;
 
     /* recyclerview to populate all reviews*/
     private android.support.v7.widget.RecyclerView RecyclerViewReviews;
@@ -68,6 +67,10 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     /* recycler trailer progress bar and error message views */
     private TextView TrailerErrorTextView;
     private ProgressBar TrailerProgressBar;
+
+    /* recycler review progress bar and error message views */
+    private TextView ReviewErrorTextView;
+    private ProgressBar ReviewProgressBar;
 
     private String MovieId;
 
@@ -89,27 +92,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
             FavoriteButton = findViewById(R.id.favorite_button);
 
-            if(intent.hasExtra(MainActivity.FavoriteKey)){
-                Favorite = intent.getBooleanExtra(MainActivity.FavoriteKey,false);
-            }
-
-            if(Favorite){
-                FavoriteButton.setText("un favorite");
-                FavoriteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        onFavoriteDeleteButtonClicked(currentMovies);
-                    }
-                });
-            }else{
-                FavoriteButton.setText("favorite");
-                FavoriteButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        onFavoriteSetButtonClicked(currentMovies);
-                    }
-                });
-            }
+            isFavorite(currentMovies);
 
             /* Publish all data into their views */
             ImageView posterView = findViewById(R.id.poster_image);
@@ -142,6 +125,9 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
             TrailerAdapter = new TrailerAdapter(this, TrailerList);
             RecyclerViewTrailer.setAdapter(TrailerAdapter);
 
+            /* Progress bar and text view for trailer recycle view */
+            ReviewErrorTextView = findViewById(R.id.detail_review_error_message);
+            ReviewProgressBar = findViewById(R.id.pb_review_loading_indicator);
 
             RecyclerViewReviews = findViewById(R.id.recyclerview_reviews);
 
@@ -157,7 +143,6 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 loadContent();
             } else {
                 Toast.makeText(this, getString(R.string.error_no_network), Toast.LENGTH_LONG).show();
-                //showErrorMessage();
             }
 
         } else {
@@ -210,11 +195,9 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     /* Check network */
     private boolean checkNetwork() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert cm != null;
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
-        }
-        return false;
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     private void loadContent() {
@@ -244,11 +227,44 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
 
     }
 
-    public void onFavoriteDeleteButtonClicked(Movies currentMovies){
-        final String currentMovieId = currentMovies.getId();
+    private void isFavorite(final Movies currentMovies){
+            final String currentMovieId = currentMovies.getId();
+            final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentMovieId);
+            final AddFavoritesViewModel viewModel = ViewModelProviders.of(this, factory).get(AddFavoritesViewModel.class);
+            viewModel.getFavorite().observe(this, new Observer<FavoriteEntry>() {
+                @Override
+                public void onChanged(@Nullable final FavoriteEntry favoriteEntry) {
+                    if(favoriteEntry == null){
+                        Log.d("isFavorite", "Favorite entry is null");
+                        FavoriteButton.setText(R.string.mark_as_favorite_button);
+                        FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                onFavoriteSetButtonClicked(currentMovies);
+                            }
+                        });
+                    }else{
+                        Log.d("isFavorite", "Favorite entry is not null");
+                        FavoriteButton.setText(R.string.un_mark_as_favorite_button);
+                        FavoriteButton.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                onFavoriteDeleteButtonClicked(favoriteEntry);
+                            }
+                        });
 
-        final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentMovieId);
+                    }
+                }
+            });
+    }
+
+    public void onFavoriteDeleteButtonClicked(FavoriteEntry currentFavorite){
+        final String currentFavoriteMovieId = currentFavorite.getMovieId();
+
+        final AddFavoritesViewModelFactory factory = new AddFavoritesViewModelFactory(FavoriteDb, currentFavoriteMovieId);
         final AddFavoritesViewModel viewModel = ViewModelProviders.of(this, factory).get(AddFavoritesViewModel.class);
+
+        Toast.makeText(this, String.format(getString(R.string.movie_un_marked_toast), currentFavorite.getTitle()), Toast.LENGTH_LONG).show();
 
         viewModel.getFavorite().observe(this, new Observer<FavoriteEntry>() {
             @Override
@@ -261,6 +277,8 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
     }
 
     public void onFavoriteSetButtonClicked(final Movies currentMovies){
+
+        Toast.makeText(this, String.format(getString(R.string.movie_marked_toast), currentMovies.getTitle()), Toast.LENGTH_LONG).show();
 
         AppExecutors.getInstance().diskIO().execute(new Runnable() {
             @Override
@@ -286,13 +304,23 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         });
     }
 
+    private void showReviewData(){
+        RecyclerViewReviews.setVisibility(View.VISIBLE);
+        ReviewErrorTextView.setVisibility(View.INVISIBLE);
+    }
+
+    private void showReviewErrorMessage(){
+        RecyclerViewReviews.setVisibility(View.INVISIBLE);
+        ReviewErrorTextView.setVisibility(View.VISIBLE);
+    }
+
     /* Async Task to make an url request against the tmdb to get the reviews list*/
     public class FetchMoviesReviews extends AsyncTask<String, Void, List<Reviews>> {
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            //LoadingIndicator.setVisibility(View.VISIBLE);
+            ReviewProgressBar.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -313,12 +341,9 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
                 String jsonReviewResponse = NetworkUtils
                         .getResponseFromHttpUrl(reviewRequestUrl);
 
-
                 /* Everything is fine we can parse the json to get our review*/
-                List<Reviews> reviewDataList = ReviewsJsonUtils
+                return ReviewsJsonUtils
                         .getReviewListFromJson(jsonReviewResponse);
-
-                return reviewDataList;
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -329,13 +354,13 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         @Override
         protected void onPostExecute(List<Reviews> reviewData) {
             /* Hide the loading bar */
-            //LoadingIndicator.setVisibility(View.INVISIBLE);
-            if (reviewData != null) {
-                //showMovieDataView();
+            ReviewProgressBar.setVisibility(View.INVISIBLE);
+            if (reviewData.size() != 0) {
+                showReviewData();
                 /* set the new data to the adapter */
                 ReviewAdapter.setReviewData(reviewData);
             } else {
-                //showErrorMessage();
+                showReviewErrorMessage();
             }
         }
     }
@@ -394,7 +419,7 @@ public class DetailActivity extends AppCompatActivity implements  com.example.an
         protected void onPostExecute(List<Trailer> trailerData) {
             /* Hide the loading bar */
             TrailerProgressBar.setVisibility(View.INVISIBLE);
-            if (trailerData != null) {
+            if (trailerData.size() != 0) {
                 showTrailerDataView();
                 /* set the new data to the adapter */
                 TrailerAdapter.setTrailerData(trailerData);

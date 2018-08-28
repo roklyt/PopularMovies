@@ -1,6 +1,5 @@
 package com.example.android.popularmovies;
 
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
@@ -39,22 +38,18 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements com.example.android.popularmovies.Adapter.MovieAdapter.MovieAdapterOnClickHandler {
 
-    /* Recycleview adapter*/
+    /* RecycleView adapter*/
     private MovieAdapter MovieAdapter;
     /* List of all movies*/
     private List<Movies> MoviesList = new ArrayList<>();
-    /* recyclerview to populate all movies*/
+    /* recyclerView to populate all movies*/
     private RecyclerView RecyclerView;
     /* Error text view*/
     private TextView ErrorMessageDisplay;
     /* Progress bar as indicator */
     private ProgressBar LoadingIndicator;
 
-    private AppDatabase FavoritesDb;
-
-    private Boolean Favorite;
-
-    public static final String FavoriteKey = "favorite";
+    AppDatabase FavoritesDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +63,10 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
 
         LoadingIndicator = findViewById(R.id.pb_loading_indicator);
 
-        /* set grid layout manager to the recyclerview */
+        /* set grid layout manager to the recyclerView */
         RecyclerView.setLayoutManager(new GridLayoutManager(this, calculateSpan()));
 
-        /* Add the Movie adapter to the recyclerview.*/
+        /* Add the Movie adapter to the recyclerView.*/
         MovieAdapter = new MovieAdapter(this, MoviesList);
         RecyclerView.setAdapter(MovieAdapter);
 
@@ -80,12 +75,10 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         String orderBy = getOrderBy();
 
         if(orderBy.equals(getResources().getString(R.string.settings_order_favorites_value))){
-            Favorite = true;
             executeLoadAllFavorites();
             showMovieDataView();
             LoadingIndicator.setVisibility(View.INVISIBLE);
         }else{
-            Favorite = false;
             /* If network is available proceed else show error message */
             if (checkNetwork()) {
                 loadMovieData();
@@ -114,11 +107,11 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
     /* Check network */
     private boolean checkNetwork() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        assert cm != null;
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
-            return true;
-        }
-        return false;
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+
     }
 
     private void showMovieDataView() {
@@ -155,7 +148,6 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
         Class destinationClass = DetailActivity.class;
         Intent intentToStartDetailActivity = new Intent(this, destinationClass);
         intentToStartDetailActivity.putExtra(Movies.PARCELABLE_KEY, currentMovie);
-        intentToStartDetailActivity.putExtra(FavoriteKey, Favorite);
         startActivity(intentToStartDetailActivity);
     }
 
@@ -185,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
             @Override
             public void onChanged(@Nullable List<FavoriteEntry> favoriteEntries) {
                 final List<Movies> movies = new ArrayList<>();
+                assert favoriteEntries != null;
                 for(FavoriteEntry favorite : favoriteEntries){
 
                     movies.add(new Movies(
@@ -204,11 +197,9 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
     private String getOrderBy(){
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        String orderBy = sharedPrefs.getString(
+        return sharedPrefs.getString(
                 getString(R.string.settings_order_key),
                 getString(R.string.settings_order_default));
-
-        return orderBy;
     }
 
 
@@ -245,11 +236,10 @@ public class MainActivity extends AppCompatActivity implements com.example.andro
                     showErrorMessage();
                     return null;
                 }
-                /* Everything is fine we can parse the json to get or movies*/
-                List<Movies> movieDataList = MovieJsonUtils
-                        .getMovieListFromJson(jsonMovieResponse);
 
-                return movieDataList;
+                /* Everything is fine we can parse the json to get or movies*/
+                return MovieJsonUtils
+                        .getMovieListFromJson(jsonMovieResponse);
 
             } catch (Exception e) {
                 e.printStackTrace();
